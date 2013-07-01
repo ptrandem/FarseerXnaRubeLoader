@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FarseerPhysics;
 using FarseerPhysics.Dynamics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -18,13 +19,19 @@ namespace RUBELoaderTest
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
-        private Rube _rube;
+        GraphicsDeviceManager _graphics;
+        private SpriteBatch _spriteBatch;
+        private RubeScene _rubeScene;
+        private DebugViewXNA _physicsDebug;
+        private Camera _camera;
 
         public Game1()
         {
-            graphics = new GraphicsDeviceManager(this);
+            _graphics = new GraphicsDeviceManager(this)
+                {
+                    PreferredBackBufferHeight = 900,
+                    PreferredBackBufferWidth = 1400
+                };
             Content.RootDirectory = "Content";
         }
 
@@ -48,10 +55,16 @@ namespace RUBELoaderTest
         protected override void LoadContent()
         {
             // Create a new SpriteBatch, which can be used to draw textures.
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-            _rube = new Rube(@"..\..\..\..\..\RubeData\basictest.json");
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _rubeScene = new RubeScene(@"..\..\..\..\..\RubeData\basictest.json", Content, GraphicsDevice);
+            _camera = new Camera(GraphicsDevice.Viewport);
 
-            // TODO: use this.Content to load your game content here
+            _physicsDebug = new DebugViewXNA(_rubeScene.World);
+            _physicsDebug.LoadContent(this.GraphicsDevice, this.Content);
+            _physicsDebug.AppendFlags(DebugViewFlags.Shape);
+            _physicsDebug.AppendFlags(DebugViewFlags.Controllers);
+            _physicsDebug.AppendFlags(DebugViewFlags.DebugPanel);
+            _physicsDebug.AppendFlags(DebugViewFlags.PerformanceGraph);
         }
 
         /// <summary>
@@ -74,7 +87,7 @@ namespace RUBELoaderTest
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            // TODO: Add your update logic here
+            _rubeScene.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -86,8 +99,12 @@ namespace RUBELoaderTest
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            
+            _rubeScene.Draw();
 
-            // TODO: Add your drawing code here
+            Matrix proj = Matrix.CreateOrthographicOffCenter(0f, GraphicsDevice.Viewport.Width/50, GraphicsDevice.Viewport.Height/50, 0f, 0f, 1f);
+            Matrix view = _camera.GetViewMatrix(Vector2.One);
+            _physicsDebug.RenderDebugData(ref proj, ref view);
 
             base.Draw(gameTime);
         }

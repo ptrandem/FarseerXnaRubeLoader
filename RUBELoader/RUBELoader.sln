@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RUBELoaderTest", "RUBELoaderTest\RUBELoaderTest\RUBELoaderTest.csproj", "{CC5D11CC-3E2B-44AF-AE61-C55C287A84DE}"
 EndProject
-Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "RUBELoaderTestContent", "RUBELoaderTest\RUBELoaderTestContent\RUBELoaderTestContent.contentproj", "{361A26F9-ECB5-4FB4-A9EA-5B38305DB836}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RUBELoaderTestContent", "RUBELoaderTest\RUBELoaderTestContent\RUBELoaderTestContent.contentproj", "{361A26F9-ECB5-4FB4-A9EA-5B38305DB836}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{BC99CAF8-9158-4753-92EE-2920EA0B2FC6}"
 	ProjectSection(SolutionItems) = preProject
