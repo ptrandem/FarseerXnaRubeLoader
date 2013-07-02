@@ -192,7 +192,7 @@
       },
       
       {
-        "angle" : 6.021385669708252,
+        "angle" : 0,
         "angularVelocity" : 0,
         "awake" : true,
         "fixture" : 
@@ -243,8 +243,8 @@
         "name" : "body1",
         "position" : 
         {
-          "x" : 14.99817085266113,
-          "y" : -21.67721939086914
+          "x" : 13.46681594848633,
+          "y" : -18.02024078369141
         },
         "type" : "dynamic"
       },
@@ -345,7 +345,7 @@
       },
       
       {
-        "angle" : 6.021385669708252,
+        "angle" : -0.2824231386184692,
         "angularVelocity" : 0,
         "awake" : true,
         "fixture" : 
@@ -354,8 +354,8 @@
           {
             "density" : 1,
             "friction" : 0.2,
-            "id" : 11,
-            "name" : "fixture5",
+            "id" : 10,
+            "name" : "fixture0",
             "shapes" : 
             [
               
@@ -365,18 +365,18 @@
             ],
             "vertices" : 
             {
-              "x" : [ -10.50, 10.50 ],
-              "y" : [ 0.0, 0.0 ]
+              "x" : [ -14.03143501281738, 6.047643661499023 ],
+              "y" : [ -0.08019447326660156, 0.1370832324028015 ]
             }
           }
         ],
-        "id" : 11,
+        "id" : 10,
         "linearVelocity" : 0,
-        "name" : "body3",
+        "name" : "body0",
         "position" : 
         {
-          "x" : 5.0,
-          "y" : -19.0
+          "x" : 7.538969516754150,
+          "y" : -17.23444747924805
         },
         "type" : "static"
       }
@@ -428,30 +428,30 @@
       },
       
       {
-        "anchorA" : 0,
-        "anchorB" : 
+        "anchorA" : 
         {
-          "x" : -10.35039997100830,
-          "y" : -0.001724250032566488
+          "x" : 5.987097740173340,
+          "y" : 0.1610393524169922
         },
-        "bodyA" : 11,
+        "anchorB" : 0,
+        "bodyA" : 10,
         "bodyB" : 6,
         "collideConnected" : false,
         "enableLimit" : true,
         "enableMotor" : true,
-        "id" : 6,
+        "id" : 5,
         "localAxisA" : 
         {
           "x" : -1.0,
           "y" : 0
         },
-        "lowerLimit" : -0.50,
+        "lowerLimit" : -2.103704929351807,
         "maxMotorForce" : 10.0,
-        "motorSpeed" : 1,
+        "motorSpeed" : 0.50,
         "name" : "joint2",
         "referenceAngle" : 0,
         "type" : "prismatic",
-        "upperLimit" : 20.50
+        "upperLimit" : 19.58979797363281
       }
     ],
     "positionIterations" : 3,

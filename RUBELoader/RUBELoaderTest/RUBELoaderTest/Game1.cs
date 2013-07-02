@@ -83,9 +83,44 @@ namespace RUBELoaderTest
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            var keyState = Keyboard.GetState();
+            var mouseState = Mouse.GetState();
+
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
+            if (keyState.IsKeyDown(Keys.Escape))
+            {
+                Exit();
+            }
+
+            if (keyState.IsKeyDown(Keys.Up))
+            {
+                _camera.Position -= new Vector2(0, 0.5f);
+            }
+
+            if (keyState.IsKeyDown(Keys.Down))
+            {
+                _camera.Position += new Vector2(0, 0.5f);
+            }
+
+            if (keyState.IsKeyDown(Keys.Left))
+            {
+                _camera.Position -= new Vector2(0.5f, 0);
+            }
+
+            if (keyState.IsKeyDown(Keys.Right))
+            {
+                _camera.Position += new Vector2(0.5f, 0);
+            }
+
+            if (keyState.IsKeyDown(Keys.OemMinus))
+            {
+                _camera.Zoom -= 0.01f;
+            }
+
+            if (keyState.IsKeyDown(Keys.OemPlus))
+            {
+                _camera.Zoom += 0.01f;
+            }
 
             _rubeScene.Update(gameTime);
 
@@ -98,10 +133,9 @@ namespace RUBELoaderTest
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.Black);
             
             _rubeScene.Draw();
-
             Matrix proj = Matrix.CreateOrthographicOffCenter(0f, GraphicsDevice.Viewport.Width/50, GraphicsDevice.Viewport.Height/50, 0f, 0f, 1f);
             Matrix view = _camera.GetViewMatrix(Vector2.One);
             _physicsDebug.RenderDebugData(ref proj, ref view);

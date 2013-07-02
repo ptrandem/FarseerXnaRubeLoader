@@ -447,7 +447,7 @@
         },
         "lowerLimit" : -0.50,
         "maxMotorForce" : 10.0,
-        "motorSpeed" : 1,
+        "motorSpeed" : 0.50,
         "name" : "joint2",
         "referenceAngle" : 0,
         "type" : "prismatic",

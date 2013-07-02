@@ -192,7 +192,7 @@
       },
       
       {
-        "angle" : 6.021385669708252,
+        "angle" : 0,
         "angularVelocity" : 0,
         "awake" : true,
         "fixture" : 
@@ -233,20 +233,13 @@
         ],
         "id" : 6,
         "linearVelocity" : 0,
-        "massData-I" : 1.471817493438721,
-        "massData-center" : 
-        {
-          "x" : 0.6621279120445252,
-          "y" : -0.008995128795504570
-        },
-        "massData-mass" : 1.567177534103394,
         "name" : "body1",
         "position" : 
         {
-          "x" : 14.99817085266113,
-          "y" : -21.67721939086914
+          "x" : 20.47692871093750,
+          "y" : -13.93399333953857
         },
-        "type" : "dynamic"
+        "type" : "static"
       },
       
       {
@@ -342,43 +335,6 @@
           "y" : -11.97760581970215
         },
         "type" : "static"
-      },
-      
-      {
-        "angle" : 6.021385669708252,
-        "angularVelocity" : 0,
-        "awake" : true,
-        "fixture" : 
-        [
-          
-          {
-            "density" : 1,
-            "friction" : 0.2,
-            "id" : 11,
-            "name" : "fixture5",
-            "shapes" : 
-            [
-              
-              {
-                "type" : "line"
-              }
-            ],
-            "vertices" : 
-            {
-              "x" : [ -10.50, 10.50 ],
-              "y" : [ 0.0, 0.0 ]
-            }
-          }
-        ],
-        "id" : 11,
-        "linearVelocity" : 0,
-        "name" : "body3",
-        "position" : 
-        {
-          "x" : 5.0,
-          "y" : -19.0
-        },
-        "type" : "static"
       }
     ],
     "metajoint" : 
@@ -425,33 +381,6 @@
         "referenceAngle" : 0,
         "type" : "revolute",
         "upperLimit" : 0
-      },
-      
-      {
-        "anchorA" : 0,
-        "anchorB" : 
-        {
-          "x" : -10.35039997100830,
-          "y" : -0.001724250032566488
-        },
-        "bodyA" : 11,
-        "bodyB" : 6,
-        "collideConnected" : false,
-        "enableLimit" : true,
-        "enableMotor" : true,
-        "id" : 6,
-        "localAxisA" : 
-        {
-          "x" : -1.0,
-          "y" : 0
-        },
-        "lowerLimit" : -0.50,
-        "maxMotorForce" : 10.0,
-        "motorSpeed" : 1,
-        "name" : "joint2",
-        "referenceAngle" : 0,
-        "type" : "prismatic",
-        "upperLimit" : 20.50
       }
     ],
     "positionIterations" : 3,
