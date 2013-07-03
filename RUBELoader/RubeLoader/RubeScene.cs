@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using FarseerPhysics;
-using FarseerPhysics.Collision.Shapes;
 using FarseerPhysics.Common;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Joints;
@@ -20,7 +17,7 @@ namespace RubeLoader
         private readonly string _jsonString;
         private readonly dynamic _json;
         private readonly List<Body> _bodies;
-        private readonly Dictionary<string, Joint> _joints;
+        private readonly List<Joint> _joints;
         private readonly Dictionary<string, Texture2D> _textures;
         private readonly List<BodyImage> _images;
         private readonly ContentManager _content;
@@ -33,7 +30,7 @@ namespace RubeLoader
         {
             _spriteBatch = new SpriteBatch(device);
             _bodies = new List<Body>();
-            _joints = new Dictionary<string, Joint>();
+            _joints = new List<Joint>();
             _textures = new Dictionary<string, Texture2D>();
             _images = new List<BodyImage>();
             _content = content;
@@ -73,7 +70,7 @@ namespace RubeLoader
                     else if (f.polygon != null)
                     {
                         var verts = GetVertices(f.polygon.vertices);
-                        fixture = FixtureFactory.AttachPolygon(verts, GetValue(f.density, 1), body);
+                        fixture = FixtureFactory.AttachPolygon(verts, GetValue(f.density, 1f), body);
                     }
 
                     if (fixture != null)
@@ -90,6 +87,7 @@ namespace RubeLoader
             {
                 foreach (var j in _json.joint)
                 {
+                    bool jointAttachedToWorld = false;
                     Joint joint = null;
                     string type = j.type;
                     int bodyAIndex = GetValue(j.bodyA, 0);
@@ -105,41 +103,76 @@ namespace RubeLoader
                             ((WheelJoint) joint).MaxMotorTorque = GetValue(j.maxMotorTorque, 0f);
                             ((WheelJoint) joint).MotorSpeed = GetValue(j.motorSpeed, 0f);
                             ((WheelJoint) joint).SpringDampingRatio = GetValue(j.springDampingRatio, 0.5f);
+                            ((WheelJoint) joint).CollideConnected = GetValue(j.collideConnected, false);
                             ((WheelJoint) joint).SpringFrequencyHz = GetValue(j.springFrequency, 20f);
                             break;
 
                         case "revolute":
-                            joint = new RevoluteJoint(_bodies[bodyAIndex], _bodies[bodyBIndex], anchorB);
+                            joint = new RevoluteJoint(_bodies[bodyAIndex], _bodies[bodyBIndex], anchorB, false);
+                            ((RevoluteJoint) joint).CollideConnected = GetValue(j.collideConnected, false);
+                            ((RevoluteJoint)joint).ReferenceAngle = -InvertYRadians(GetValue(j.refAngle, 0f));
                             ((RevoluteJoint) joint).MotorEnabled = GetValue(j.enableMotor, false);
                             ((RevoluteJoint) joint).MaxMotorTorque = GetValue(j.maxMotorTorque, 0f);
                             ((RevoluteJoint) joint).MotorSpeed = GetValue(j.motorSpeed, 0f);
+                            ((RevoluteJoint)joint).SetLimits(InvertYRadians(GetValue(j.upperLimit, 0f)), InvertYRadians(GetValue(j.lowerLimit, 0f)));
                             ((RevoluteJoint) joint).LimitEnabled = GetValue(j.enableLimit, false);
-                            ((RevoluteJoint) joint).SetLimits(InvertYRadians(GetValue(j.lowerLimit, 0f)), InvertYRadians(GetValue(j.upperLimit, 0f)));
-                            ((RevoluteJoint)joint).ReferenceAngle = InvertYRadians(GetValue(j.refAngle, 0f));
                             break;
 
                         case "prismatic":
-                            var localAxisA = InvertY(new Vector2(GetValue(j.localAxisA.x, 0f), GetValue(j.localAxisA.y, 0f)));
-                            localAxisA.Normalize();
-                            
-                            var pAxis = (AngleToVector(_bodies[bodyAIndex].Rotation));
+                            var localAxisA = InvertY(GetVector2(j.localAxisA));
+                            var pAxis = (AngleToVector(_bodies[bodyAIndex].Rotation - VectorToAngle(localAxisA)));
                             pAxis.Normalize();
-                            joint = new PrismaticJoint(_bodies[bodyAIndex], _bodies[bodyBIndex], anchorA, anchorB, pAxis);
-                            //((PrismaticJoint)joint).LocalXAxisA = localAxisA;
+                            joint = JointFactory.CreatePrismaticJoint(_bodies[bodyAIndex], _bodies[bodyBIndex], anchorB, pAxis);
+                            ((PrismaticJoint) joint).LocalAnchorA = anchorA;
                             ((PrismaticJoint) joint).MotorEnabled = GetValue(j.enableMotor, false);
                             ((PrismaticJoint) joint).MaxMotorForce = GetValue(j.maxMotorForce, 0f);
                             ((PrismaticJoint) joint).MotorSpeed = GetValue(j.motorSpeed, 0f);
                             ((PrismaticJoint) joint).LimitEnabled = GetValue(j.enableLimit, false);
                             ((PrismaticJoint) joint).SetLimits(GetValue(j.lowerLimit, 0f), GetValue(j.upperLimit, 0f));
+                            ((PrismaticJoint)joint).CollideConnected = GetValue(j.collideConnected, false);
                             ((PrismaticJoint)joint).ReferenceAngle = InvertYRadians(GetValue(j.refAngle, 0f));
                             break;
 
+                        case "distance":
+                            joint = new DistanceJoint(_bodies[bodyAIndex], _bodies[bodyBIndex], anchorA, anchorB, false);
+                            ((DistanceJoint) joint).DampingRatio = GetValue(j.dampingRatio, 0f);
+                            ((DistanceJoint) joint).Frequency = GetValue(j.frequency, 0f);
+                            ((DistanceJoint)joint).Length = GetValue(j.length, 0f);
+                            break;
+
+                        case "rope":
+                            joint = new RopeJoint(_bodies[bodyAIndex], _bodies[bodyBIndex], anchorA, anchorB);
+                            ((RopeJoint) joint).CollideConnected = GetValue(j.collideConnected, false);
+                            ((RopeJoint) joint).MaxLength = GetValue(j.maxLength, 1f);
+                            break;
+
+                        case "weld":
+                            //jointAttachedToWorld = true;
+                            //joint = JointFactory.CreateWeldJoint(World, _bodies[bodyAIndex], _bodies[bodyBIndex], anchorA, anchorB);
+                            joint = new WeldJoint(_bodies[bodyAIndex], _bodies[bodyBIndex], _bodies[bodyAIndex].Position + anchorA, _bodies[bodyBIndex].Position + anchorB);
+                            ((WeldJoint)joint).CollideConnected = GetValue(j.collideConnected, false);
+                            ((WeldJoint) joint).DampingRatio = GetValue(j.DampingRatio, 0f);
+                            ((WeldJoint) joint).FrequencyHz = GetValue(j.frequency, 0f);
+                            //((WeldJoint) joint).ReferenceAngle = GetValue(j.refAngle, 0f);
+                            break;
+
+                        case "motor":
+                            joint = new MotorJoint(_bodies[bodyAIndex], _bodies[bodyBIndex]);
+                            ((MotorJoint) joint).LinearOffset = anchorA;
+                            ((MotorJoint) joint).AngularOffset = InvertYRadians(GetValue(j.refAngle, 0f));
+                            ((MotorJoint) joint).MaxForce = GetValue(j.maxForce, 0f);
+                            ((MotorJoint) joint).MaxTorque = GetValue(j.maxTorque, 0f);
+                            ((MotorJoint) joint).CollideConnected = GetValue(j.collideConnected, false);
+                            break;
                     }
 
                     if (joint != null)
                     {
-                        World.AddJoint(joint);
-                        _joints.Add(GetValue(j.name, ""), joint);
+                        if (!jointAttachedToWorld)
+                        {
+                            World.AddJoint(joint);
+                        }
+                        _joints.Add(joint);
                     }
                 }
             }
@@ -179,7 +212,7 @@ namespace RubeLoader
 
         public void Update(GameTime gameTime)
         {
-            World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 30f)));
+            World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 60f)));
         }
 
         public void Draw()
