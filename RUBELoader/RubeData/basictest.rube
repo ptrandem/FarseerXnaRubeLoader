@@ -853,7 +853,7 @@
         [
           
           {
-            "density" : 1,
+            "density" : 0.2,
             "friction" : 0.2,
             "id" : 26,
             "name" : "fixture8",
@@ -885,18 +885,62 @@
         ],
         "id" : 26,
         "linearVelocity" : 0,
-        "massData-I" : 6.075950622558594,
+        "massData-I" : 1.215190172195435,
         "massData-center" : 
         {
           "x" : 1.649999499320984,
           "y" : 4.773180535266874e-007
         },
-        "massData-mass" : 1.561819911003113,
+        "massData-mass" : 0.3123639822006226,
         "name" : "body6",
         "position" : 
         {
-          "x" : 15.85087203979492,
-          "y" : -22.78041267395020
+          "x" : 15.21397590637207,
+          "y" : -22.76975440979004
+        },
+        "type" : "dynamic"
+      },
+      
+      {
+        "angle" : 0,
+        "angularVelocity" : 0,
+        "awake" : true,
+        "fixture" : 
+        [
+          
+          {
+            "density" : 1,
+            "friction" : 0.2,
+            "id" : 28,
+            "name" : "fixture7",
+            "shapes" : 
+            [
+              
+              {
+                "type" : "polygon"
+              }
+            ],
+            "vertices" : 
+            {
+              "x" : [ 1.803483963012695, -0.250, -0.250 ],
+              "y" : [ 0.04827690124511719, 0.4330129921436310, -0.4330129921436310 ]
+            }
+          }
+        ],
+        "id" : 28,
+        "linearVelocity" : 0,
+        "massData-I" : 0.4043041467666626,
+        "massData-center" : 
+        {
+          "x" : 0.4344946444034576,
+          "y" : 0.01609230041503906
+        },
+        "massData-mass" : 0.8891852498054504,
+        "name" : "body5",
+        "position" : 
+        {
+          "x" : 9.860532760620117,
+          "y" : -10.09380817413330
         },
         "type" : "dynamic"
       }
@@ -1120,11 +1164,33 @@
         "collideConnected" : false,
         "correctionFactor" : 0.1000000014901161,
         "id" : 18,
-        "maxForce" : 100.0,
-        "maxTorque" : 100.0,
+        "maxForce" : 10.0,
+        "maxTorque" : 10.0,
         "name" : "joint6",
         "referenceAngle" : 0.3490658402442932,
         "type" : "motor"
+      },
+      
+      {
+        "anchorA" : 
+        {
+          "x" : -0.05877117812633514,
+          "y" : 0.4490837752819061
+        },
+        "anchorB" : 
+        {
+          "x" : -0.07181389629840851,
+          "y" : -0.02258069999516010
+        },
+        "bodyA" : 17,
+        "bodyB" : 28,
+        "collideConnected" : false,
+        "dampingRatio" : 1,
+        "frequency" : 2.0,
+        "id" : 21,
+        "name" : "joint7",
+        "referenceAngle" : 0,
+        "type" : "weld"
       }
     ],
     "positionIterations" : 3,
