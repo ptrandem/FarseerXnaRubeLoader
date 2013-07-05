@@ -14,6 +14,7 @@
             
             {
                "density" : 1,
+               "filter-maskBits" : 65534,
                "friction" : 0.2,
                "name" : "fixture7",
                "polygon" : 
@@ -37,8 +38,8 @@
          "name" : "body5",
          "position" : 
          {
-            "x" : 9.860532760620117,
-            "y" : -10.09380817413330
+            "x" : 12.99016189575195,
+            "y" : -9.947563171386719
          },
          "type" : 2
       },
@@ -107,6 +108,7 @@
                   "radius" : 0.2158112674951553
                },
                "density" : 1,
+               "filter-categoryBits" : 0,
                "friction" : 0.2,
                "name" : "fixture6"
             }
@@ -222,6 +224,8 @@
                   }
                },
                "density" : 1,
+               "filter-categoryBits" : 33,
+               "filter-maskBits" : 65487,
                "friction" : 0.2,
                "name" : "fixture5"
             }
@@ -278,11 +282,10 @@
             "y" : 0.004374420270323753
          },
          "massData-mass" : 1.470114827156067,
-         "name" : "chacterbody",
          "position" : 
          {
-            "x" : 9.846411705017090,
-            "y" : -10.56711864471436
+            "x" : 12.97604084014893,
+            "y" : -10.42087364196777
          },
          "type" : 2
       },
@@ -311,8 +314,8 @@
          "name" : "characterwheel",
          "position" : 
          {
-            "x" : 9.857939720153809,
-            "y" : -11.51120853424072
+            "x" : 12.98756885528565,
+            "y" : -11.36496353149414
          },
          "type" : 2
       },
@@ -382,7 +385,7 @@
                   "radius" : 0.2435062080621719
                },
                "density" : 1,
-               "friction" : 0.2,
+               "friction" : 10.0,
                "name" : "fixture2"
             }
          ],
@@ -544,36 +547,6 @@
       },
       
       {
-         "angle" : 0,
-         "angularVelocity" : 0,
-         "awake" : true,
-         "fixture" : 
-         [
-            
-            {
-               "circle" : 
-               {
-                  "center" : 0,
-                  "radius" : 0.2435062080621719
-               },
-               "density" : 1,
-               "friction" : 0.2,
-               "name" : "fixture2"
-            }
-         ],
-         "linearVelocity" : 0,
-         "massData-I" : 0.005522808991372585,
-         "massData-mass" : 0.1862816065549851,
-         "name" : "characterwheel",
-         "position" : 
-         {
-            "x" : 9.859161376953125,
-            "y" : -13.41263198852539
-         },
-         "type" : 2
-      },
-      
-      {
          "angle" : 1.527442812919617,
          "angularVelocity" : 0,
          "awake" : true,
@@ -694,6 +667,7 @@
                   }
                },
                "density" : 1,
+               "filter-categoryBits" : 4,
                "friction" : 0.2,
                "name" : "fixture0"
             }
@@ -706,6 +680,36 @@
             "y" : -14.36808300018311
          },
          "type" : 0
+      },
+      
+      {
+         "angle" : 0,
+         "angularVelocity" : 0,
+         "awake" : true,
+         "fixture" : 
+         [
+            
+            {
+               "circle" : 
+               {
+                  "center" : 0,
+                  "radius" : 0.2435062080621719
+               },
+               "density" : 1,
+               "friction" : 0.2,
+               "name" : "fixture2"
+            }
+         ],
+         "linearVelocity" : 0,
+         "massData-I" : 0.005522808991372585,
+         "massData-mass" : 0.1862816065549851,
+         "name" : "characterwheel",
+         "position" : 
+         {
+            "x" : 9.859161376953125,
+            "y" : -13.41263198852539
+         },
+         "type" : 2
       },
       
       {
@@ -750,7 +754,6 @@
             "y" : 0.001161554828286171
          },
          "massData-mass" : 0.1036379039287567,
-         "name" : "chacterbody",
          "position" : 
          {
             "x" : 9.847632408142090,
@@ -809,6 +812,29 @@
       {
          "anchorA" : 
          {
+            "x" : 0.01152896881103516,
+            "y" : -0.4315118789672852
+         },
+         "anchorB" : 0,
+         "bodyA" : 8,
+         "bodyB" : 9,
+         "enableMotor" : true,
+         "localAxisA" : 
+         {
+            "x" : 0,
+            "y" : 1
+         },
+         "maxMotorTorque" : 100.0,
+         "motorSpeed" : 0,
+         "name" : "characterWheel",
+         "springDampingRatio" : 0.6999999880790710,
+         "springFrequency" : 4.0,
+         "type" : "wheel"
+      },
+      
+      {
+         "anchorA" : 
+         {
             "x" : -0.05877113342285156,
             "y" : 0.4490833282470703
          },
@@ -845,23 +871,6 @@
       
       {
          "anchorA" : 0,
-         "anchorB" : 0,
-         "bodyA" : 13,
-         "bodyB" : 15,
-         "enableLimit" : true,
-         "enableMotor" : false,
-         "jointSpeed" : 0,
-         "lowerLimit" : 1.367239952087402,
-         "maxMotorTorque" : 0,
-         "motorSpeed" : 0.5235987901687622,
-         "name" : "joint1",
-         "refAngle" : 0,
-         "type" : "revolute",
-         "upperLimit" : 2.981230020523071
-      },
-      
-      {
-         "anchorA" : 0,
          "anchorB" : 
          {
             "x" : 2.861022949218750e-005,
@@ -873,6 +882,18 @@
          "maxLength" : 4.51062011718750,
          "name" : "joint5",
          "type" : "rope"
+      },
+      
+      {
+         "anchorA" : 0,
+         "anchorB" : 0,
+         "bodyA" : 4,
+         "bodyB" : 3,
+         "dampingRatio" : 0,
+         "frequency" : 0,
+         "length" : 2.712019920349121,
+         "name" : "joint4",
+         "type" : "distance"
       },
       
       {
@@ -898,18 +919,6 @@
          "refAngle" : 0,
          "type" : "prismatic",
          "upperLimit" : 30.0
-      },
-      
-      {
-         "anchorA" : 0,
-         "anchorB" : 0,
-         "bodyA" : 4,
-         "bodyB" : 3,
-         "dampingRatio" : 0,
-         "frequency" : 0,
-         "length" : 2.712019920349121,
-         "name" : "joint4",
-         "type" : "distance"
       },
       
       {
@@ -940,31 +949,6 @@
       {
          "anchorA" : 
          {
-            "x" : 10.49997997283936,
-            "y" : -2.655820935615338e-006
-         },
-         "anchorB" : 0,
-         "bodyA" : 12,
-         "bodyB" : 16,
-         "enableLimit" : true,
-         "enableMotor" : true,
-         "localAxisA" : 
-         {
-            "x" : 1,
-            "y" : 0
-         },
-         "lowerLimit" : -20.0,
-         "maxMotorForce" : 10.0,
-         "motorSpeed" : 1,
-         "name" : "joint2",
-         "refAngle" : 0,
-         "type" : "prismatic",
-         "upperLimit" : 5.0
-      },
-      
-      {
-         "anchorA" : 
-         {
             "x" : 0.04342079162597656,
             "y" : -1.625208854675293
          },
@@ -988,24 +972,43 @@
       {
          "anchorA" : 
          {
-            "x" : 0.01152896881103516,
-            "y" : -0.4315118789672852
+            "x" : 10.49997997283936,
+            "y" : -2.655820935615338e-006
          },
          "anchorB" : 0,
-         "bodyA" : 8,
-         "bodyB" : 9,
-         "enableMotor" : false,
+         "bodyA" : 12,
+         "bodyB" : 15,
+         "enableLimit" : true,
+         "enableMotor" : true,
          "localAxisA" : 
          {
-            "x" : 0,
-            "y" : 1
+            "x" : 1,
+            "y" : 0
          },
+         "lowerLimit" : -20.0,
+         "maxMotorForce" : 10.0,
+         "motorSpeed" : 1,
+         "name" : "joint2",
+         "refAngle" : 0,
+         "type" : "prismatic",
+         "upperLimit" : 5.0
+      },
+      
+      {
+         "anchorA" : 0,
+         "anchorB" : 0,
+         "bodyA" : 13,
+         "bodyB" : 14,
+         "enableLimit" : true,
+         "enableMotor" : false,
+         "jointSpeed" : 0,
+         "lowerLimit" : 1.367239952087402,
          "maxMotorTorque" : 0,
-         "motorSpeed" : 0,
-         "name" : "joint0",
-         "springDampingRatio" : 0.6999999880790710,
-         "springFrequency" : 4.0,
-         "type" : "wheel"
+         "motorSpeed" : 0.5235987901687622,
+         "name" : "joint1",
+         "refAngle" : 0,
+         "type" : "revolute",
+         "upperLimit" : 2.981230020523071
       },
       
       {
@@ -1016,7 +1019,7 @@
          },
          "anchorB" : 0,
          "bodyA" : 18,
-         "bodyB" : 14,
+         "bodyB" : 17,
          "enableMotor" : false,
          "localAxisA" : 
          {

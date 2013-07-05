@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json.Linq;
 using Microsoft.Xna.Framework;
+using RubeLoader.Interfaces;
+using System.Linq;
 
 namespace RubeLoader
 {
@@ -21,7 +23,7 @@ namespace RubeLoader
         private readonly Dictionary<string, Texture2D> _textures;
         private readonly List<BodyImage> _images;
         private readonly ContentManager _content;
-        private readonly GraphicsDevice _device;
+        //private readonly GraphicsDevice _device;
         private readonly SpriteBatch _spriteBatch;
         
         public World World { get; private set; }
@@ -34,7 +36,7 @@ namespace RubeLoader
             _textures = new Dictionary<string, Texture2D>();
             _images = new List<BodyImage>();
             _content = content;
-            _device = device;
+            //_device = device;
 
             _jsonString = File.ReadAllText(rubePath);
 
@@ -69,16 +71,24 @@ namespace RubeLoader
                     }
                     else if (f.polygon != null)
                     {
+                        //TODO: density/mass seems pretty different from box2d; investigate when necessary.
                         var verts = GetVertices(f.polygon.vertices);
                         fixture = FixtureFactory.AttachPolygon(verts, GetValue(f.density, 1f), body);
                     }
+                    // TODO: more fixture types? INVESTIGATE AND TEST.
 
                     if (fixture != null)
                     {
+                        //TODO: look into mass data from RUBE. nts if needed as mass is calced based on density, area, etc., but worth investigating.
+
                         fixture.Friction = friction;
+
+                        //TODO: collisions aren't fully mapped yet; needs more work.
+                        fixture.CollisionCategories = (Category)GetValue(f, "filter-categoryBits", Int64.MaxValue);
+                        fixture.CollidesWith = (Category)GetValue(f, "filter-maskBits", Int64.MaxValue);
                     }
                 }
-                var bodyData = new BodyData {Name = GetValue(b.Name, "")};
+                var bodyData = new BodyData {Name = GetValue(b.name, "")};
                 body.UserData = bodyData;
                 _bodies.Add(body);
             }
@@ -87,7 +97,6 @@ namespace RubeLoader
             {
                 foreach (var j in _json.joint)
                 {
-                    bool jointAttachedToWorld = false;
                     Joint joint = null;
                     string type = j.type;
                     int bodyAIndex = GetValue(j.bodyA, 0);
@@ -103,13 +112,11 @@ namespace RubeLoader
                             ((WheelJoint) joint).MaxMotorTorque = GetValue(j.maxMotorTorque, 0f);
                             ((WheelJoint) joint).MotorSpeed = GetValue(j.motorSpeed, 0f);
                             ((WheelJoint) joint).SpringDampingRatio = GetValue(j.springDampingRatio, 0.5f);
-                            ((WheelJoint) joint).CollideConnected = GetValue(j.collideConnected, false);
                             ((WheelJoint) joint).SpringFrequencyHz = GetValue(j.springFrequency, 20f);
                             break;
 
                         case "revolute":
                             joint = new RevoluteJoint(_bodies[bodyAIndex], _bodies[bodyBIndex], anchorB, false);
-                            ((RevoluteJoint) joint).CollideConnected = GetValue(j.collideConnected, false);
                             ((RevoluteJoint)joint).ReferenceAngle = -InvertYRadians(GetValue(j.refAngle, 0f));
                             ((RevoluteJoint) joint).MotorEnabled = GetValue(j.enableMotor, false);
                             ((RevoluteJoint) joint).MaxMotorTorque = GetValue(j.maxMotorTorque, 0f);
@@ -129,7 +136,7 @@ namespace RubeLoader
                             ((PrismaticJoint) joint).MotorSpeed = GetValue(j.motorSpeed, 0f);
                             ((PrismaticJoint) joint).LimitEnabled = GetValue(j.enableLimit, false);
                             ((PrismaticJoint) joint).SetLimits(GetValue(j.lowerLimit, 0f), GetValue(j.upperLimit, 0f));
-                            ((PrismaticJoint)joint).CollideConnected = GetValue(j.collideConnected, false);
+                            
                             ((PrismaticJoint)joint).ReferenceAngle = InvertYRadians(GetValue(j.refAngle, 0f));
                             break;
 
@@ -142,18 +149,14 @@ namespace RubeLoader
 
                         case "rope":
                             joint = new RopeJoint(_bodies[bodyAIndex], _bodies[bodyBIndex], anchorA, anchorB);
-                            ((RopeJoint) joint).CollideConnected = GetValue(j.collideConnected, false);
                             ((RopeJoint) joint).MaxLength = GetValue(j.maxLength, 1f);
                             break;
 
                         case "weld":
-                            //jointAttachedToWorld = true;
-                            //joint = JointFactory.CreateWeldJoint(World, _bodies[bodyAIndex], _bodies[bodyBIndex], anchorA, anchorB);
                             joint = new WeldJoint(_bodies[bodyAIndex], _bodies[bodyBIndex], _bodies[bodyAIndex].Position + anchorA, _bodies[bodyBIndex].Position + anchorB);
-                            ((WeldJoint)joint).CollideConnected = GetValue(j.collideConnected, false);
                             ((WeldJoint) joint).DampingRatio = GetValue(j.DampingRatio, 0f);
                             ((WeldJoint) joint).FrequencyHz = GetValue(j.frequency, 0f);
-                            //((WeldJoint) joint).ReferenceAngle = GetValue(j.refAngle, 0f);
+                            //((WeldJoint) joint).ReferenceAngle = GetValue(j.refAngle, 0f); // why no setter?
                             break;
 
                         case "motor":
@@ -162,23 +165,26 @@ namespace RubeLoader
                             ((MotorJoint) joint).AngularOffset = InvertYRadians(GetValue(j.refAngle, 0f));
                             ((MotorJoint) joint).MaxForce = GetValue(j.maxForce, 0f);
                             ((MotorJoint) joint).MaxTorque = GetValue(j.maxTorque, 0f);
-                            ((MotorJoint) joint).CollideConnected = GetValue(j.collideConnected, false);
                             break;
+
+                            //TODO: ADD friction joint when it becomes worth it.
                     }
 
                     if (joint != null)
                     {
-                        if (!jointAttachedToWorld)
-                        {
-                            World.AddJoint(joint);
-                        }
+                        var jointData = new JointData { Name = GetValue(j.name, "") };
+                        joint.UserData = jointData;
+
+                        joint.CollideConnected = GetValue(j.collideConnected, false);
                         _joints.Add(joint);
+                        World.AddJoint(joint);
                     }
                 }
             }
 
             if (_json.image != null)
             {
+                //TODO: this needs some work.
                 foreach (var i in _json.image)
                 {
                     if (i.file != null)
@@ -210,6 +216,19 @@ namespace RubeLoader
             }
         }
 
+        public void AttachBodyControllers<T>(T controller, string bodyName)  where T : IBodyController
+        {
+            controller.Body = _bodies.FirstOrDefault(j => j.UserData != null && ((BodyData)j.UserData).Name == bodyName);
+            controller.BodyName = bodyName;
+        }
+
+        public void AttachJointControllers<T>(T controller, string jointName) where T : IJointController
+        {
+            controller.Joint = _joints.FirstOrDefault(j => j.UserData != null && ((JointData) j.UserData).Name == jointName);
+            controller.JointName = jointName;
+        }
+
+        #region Periodic Methods
         public void Update(GameTime gameTime)
         {
             World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 60f)));
@@ -220,36 +239,38 @@ namespace RubeLoader
             
             _spriteBatch.Begin();
 
-            //foreach (var body in _bodies)
-            //{
-            //    foreach (var fixture in body.FixtureList)
-            //    {
-            //        Vertices verts;
-            //        switch (fixture.ShapeType)
-            //        {
-            //            case ShapeType.Circle:
-            //                var circle = fixture.Shape as CircleShape;
-            //                _spriteBatch.DrawCircle(ConvertUnitsA.ToDisplayUnits(body.Position),
-            //                                        ConvertUnitsA.ToDisplayUnits(circle.Radius), 40, Color.LightBlue, 1f);
-            //                break;
+            /* todo: this could render some stuff if the farseer debug view didn't work so perfectly well.  but it does, and this is shite. so.
+            foreach (var body in _bodies)
+            {
+                foreach (var fixture in body.FixtureList)
+                {
+                    Vertices verts;
+                    switch (fixture.ShapeType)
+                    {
+                        case ShapeType.Circle:
+                            var circle = fixture.Shape as CircleShape;
+                            _spriteBatch.DrawCircle(ConvertUnitsA.ToDisplayUnits(body.Position),
+                                                    ConvertUnitsA.ToDisplayUnits(circle.Radius), 40, Color.LightBlue, 1f);
+                            break;
 
-            //            case ShapeType.Chain:
-            //                var chain = fixture.Shape as ChainShape;
-            //                DrawPolygon(_spriteBatch, chain.Vertices, body.Position);
-            //                break;
+                        case ShapeType.Chain:
+                            var chain = fixture.Shape as ChainShape;
+                            DrawPolygon(_spriteBatch, chain.Vertices, body.Position);
+                            break;
 
-            //            case ShapeType.Polygon:
-            //                var poly = fixture.Shape as PolygonShape;
-            //                DrawPolygon(_spriteBatch, poly.Vertices, body.Position);
+                        case ShapeType.Polygon:
+                            var poly = fixture.Shape as PolygonShape;
+                            DrawPolygon(_spriteBatch, poly.Vertices, body.Position);
 
-            //                break;
-            //            //case ShapeType.Edge:
-            //            //    var edge = fixture.Shape as EdgeShape;
-            //            //    DrawPolygon(_spriteBatch, edge.Vertex0, edge.Vertex1 body.Position);
-            //            //    break;
-            //        }
-            //    }
-            //}
+                            break;
+                        //case ShapeType.Edge:
+                        //    var edge = fixture.Shape as EdgeShape;
+                        //    DrawPolygon(_spriteBatch, edge.Vertex0, edge.Vertex1 body.Position);
+                        //    break;
+                    }
+                }
+            }
+            */
 
             foreach (var image in _images)
             {
@@ -261,27 +282,19 @@ namespace RubeLoader
             
             _spriteBatch.End();
         }
+        #endregion
 
+        #region Value Helpers
         private static Vector2 AngleToVector(float angle)
         {
-            var vec = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle));
+            var vec = new Vector2((float) Math.Cos(angle), (float) Math.Sin(angle));
             vec.Normalize();
             return vec;
         }
 
         private static float VectorToAngle(Vector2 vector)
         {
-            return (float)Math.Atan2(vector.Y, vector.X);
-        }
-
-        private static float InvertYRadians(float value)
-        {
-            return (float)(2 * Math.PI) - value;
-        }
-
-        private static Vector2 InvertY(Vector2 vec)
-        {
-            return new Vector2(vec.X, InvertY(vec.Y));
+            return (float) Math.Atan2(vector.Y, vector.X);
         }
 
         private static float InvertY(float y)
@@ -289,49 +302,14 @@ namespace RubeLoader
             return 0 - y;
         }
 
-        private void DrawPolygon(SpriteBatch spriteBatch, Vertices verts, Vector2 origin)
+        private static Vector2 InvertY(Vector2 vec)
         {
-            var firstPoint = new Vector2();
-            for (var i = 0; i < verts.Count -1; i++)
-            {
-                var start = ConvertUnitsA.ToDisplayUnits(verts[i]) + ConvertUnitsA.ToDisplayUnits(origin);
-                var end = ConvertUnitsA.ToDisplayUnits(verts[i+1]) + ConvertUnitsA.ToDisplayUnits(origin);
-                spriteBatch.DrawLine(start, end, Color.LightBlue, 1f);
-
-                if (i == 0)
-                {
-                    firstPoint = start;
-                }
-                if (i == verts.Count - 2)
-                {
-                    spriteBatch.DrawLine(end, firstPoint, Color.LightBlue, 1f);
-                }
-            }
-            
+            return new Vector2(vec.X, InvertY(vec.Y));
         }
 
-
-        private static Vertices GetVertices(dynamic vertsArray, bool invertY = true)
+        private static float InvertYRadians(float value)
         {
-            var vertices = new Vertices();
-            var list = GetVectors(vertsArray, invertY);
-            foreach (var item in list)
-            {
-                vertices.Add(item);
-            }
-            return vertices;
-        }
-
-        private static IEnumerable<Vector2> GetVectors(dynamic vertsArray, bool invertY = true)
-        {
-            var vectors = new List<Vector2>();
-            var count = vertsArray.x.Count;
-            for (int i = 0; i < count; i++)
-            {
-                var vec = new Vector2((float) vertsArray.x[i], (float) vertsArray.y[i]);
-                vectors.Add(invertY ? InvertY(vec) : vec);
-            }
-            return vectors;
+            return (float)(2 * Math.PI) - value;
         }
 
         private static T GetValue<T>(dynamic value, T defaultValue)
@@ -344,12 +322,36 @@ namespace RubeLoader
             return result;
         }
 
+        private static T GetValue<T>(dynamic source, string propertyName, T defaultValue)
+        {
+            T result = defaultValue;
+            JToken token = ((JToken)source).SelectToken(propertyName);
+            if (token != null)
+            {
+                result = GetValue(token.Value<T>(), defaultValue);
+            }
+            return result;
+        }
+
+        private static IEnumerable<Vector2> GetVectors(dynamic vertsArray, bool invertY = true)
+        {
+            var vectors = new List<Vector2>();
+            dynamic count = vertsArray.x.Count;
+            for (int i = 0; i < count; i++)
+            {
+                var vec = new Vector2((float)vertsArray.x[i], (float)vertsArray.y[i]);
+                vectors.Add(invertY ? InvertY(vec) : vec);
+            }
+            return vectors;
+        }
+
         private static Vector2 GetVector2(dynamic value)
         {
             var v = new Vector2();
             if (value != null)
             {
-                if ((value as JToken).Type == JTokenType.Object)
+                var jToken = value as JToken;
+                if (jToken != null && jToken.Type == JTokenType.Object)
                 {
                     v = new Vector2(GetValue(value.x, 0f), GetValue(value.y, 0f));
                 }
@@ -361,6 +363,42 @@ namespace RubeLoader
 
             return v;
         }
+
+        private static Vertices GetVertices(dynamic vertsArray, bool invertY = true)
+        {
+            var vertices = new Vertices();
+            dynamic list = GetVectors(vertsArray, invertY);
+            foreach (dynamic item in list)
+            {
+                vertices.Add(item);
+            }
+            return vertices;
+        }
+        #endregion
+
+        //#region Drawing Helpers
+        //private void DrawPolygon(SpriteBatch spriteBatch, Vertices verts, Vector2 origin)
+        //{
+        //    var firstPoint = new Vector2();
+        //    for (var i = 0; i < verts.Count - 1; i++)
+        //    {
+        //        var start = ConvertUnitsA.ToDisplayUnits(verts[i]) + ConvertUnitsA.ToDisplayUnits(origin);
+        //        var end = ConvertUnitsA.ToDisplayUnits(verts[i + 1]) + ConvertUnitsA.ToDisplayUnits(origin);
+        //        spriteBatch.DrawLine(start, end, Color.LightBlue, 1f);
+
+        //        if (i == 0)
+        //        {
+        //            firstPoint = start;
+        //        }
+        //        if (i == verts.Count - 2)
+        //        {
+        //            spriteBatch.DrawLine(end, firstPoint, Color.LightBlue, 1f);
+        //        }
+        //    }
+
+        //}
+        //#endregion
+
     }
 }
 

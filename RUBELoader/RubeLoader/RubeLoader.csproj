@@ -51,16 +51,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BodyData.cs" />
-    <Compile Include="BodyImage.cs" />
+    <Compile Include="DataContainers\BodyData.cs" />
+    <Compile Include="DataContainers\BodyImage.cs" />
     <Compile Include="ConvertUnits.cs" />
-    <Compile Include="Primitives2D.cs" />
+    <Compile Include="DataContainers\JointData.cs" />
+    <Compile Include="Interfaces\IBodyController.cs" />
+    <Compile Include="Interfaces\IJointController.cs" />
     <Compile Include="RubeScene.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

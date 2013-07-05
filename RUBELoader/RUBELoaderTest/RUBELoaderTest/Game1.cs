@@ -1,15 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using FarseerPhysics;
-using FarseerPhysics.Dynamics;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Media;
+using RUBELoaderTest.Entities;
 using RubeLoader;
 
 namespace RUBELoaderTest
@@ -17,13 +10,15 @@ namespace RUBELoaderTest
     /// <summary>
     /// This is the main type for your game
     /// </summary>
-    public class Game1 : Microsoft.Xna.Framework.Game
+    public class Game1 : Game
     {
         GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private RubeScene _rubeScene;
         private DebugViewXNA _physicsDebug;
         private Camera _camera;
+        private Character _character;
+        private SpriteFont _font;
 
         public Game1()
         {
@@ -56,8 +51,9 @@ namespace RUBELoaderTest
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _rubeScene = new RubeScene(@"..\..\..\..\..\RubeData\basictest.json", Content, GraphicsDevice);
+            _rubeScene = new RubeScene(@"..\..\..\..\..\RubeData\cartest.json", Content, GraphicsDevice);
             _camera = new Camera(GraphicsDevice.Viewport);
+            _font = Content.Load<SpriteFont>("font");
 
             _physicsDebug = new DebugViewXNA(_rubeScene.World);
             _physicsDebug.LoadContent(this.GraphicsDevice, this.Content);
@@ -65,6 +61,13 @@ namespace RUBELoaderTest
             _physicsDebug.AppendFlags(DebugViewFlags.Controllers);
             _physicsDebug.AppendFlags(DebugViewFlags.DebugPanel);
             _physicsDebug.AppendFlags(DebugViewFlags.PerformanceGraph);
+
+            _character = new Character();
+            _rubeScene.AttachJointControllers(_character, "characterWheel");
+            _rubeScene.AttachBodyControllers(_character, "chacterbody");
+            _character.Init();
+
+
         }
 
         /// <summary>
@@ -94,35 +97,57 @@ namespace RUBELoaderTest
 
             if (keyState.IsKeyDown(Keys.Up))
             {
-                _camera.Position -= new Vector2(0, 0.5f);
+                _camera.Position -= new Vector2(0, 0.1f);
             }
 
             if (keyState.IsKeyDown(Keys.Down))
             {
-                _camera.Position += new Vector2(0, 0.5f);
+                _camera.Position += new Vector2(0, 0.1f);
             }
 
             if (keyState.IsKeyDown(Keys.Left))
             {
-                _camera.Position -= new Vector2(0.5f, 0);
+                _camera.Position -= new Vector2(0.1f, 0);
             }
 
             if (keyState.IsKeyDown(Keys.Right))
             {
-                _camera.Position += new Vector2(0.5f, 0);
+                _camera.Position += new Vector2(0.1f, 0);
+            }
+
+            if(keyState.IsKeyDown(Keys.A))
+            {
+                _character.MoveLeft();
+            }
+
+            if (keyState.IsKeyDown(Keys.D))
+            {
+                _character.MoveRight();
+            }
+
+            if (keyState.IsKeyDown(Keys.W))
+            {
+                _character.Jump();
             }
 
             if (keyState.IsKeyDown(Keys.OemMinus))
             {
-                _camera.Zoom -= 0.01f;
+                _camera.Zoom -= 0.001f;
+                //_camera.Position = new Vector2(_camera.Position.X + (_camera.Zoom * .9f)
+                //    , _camera.Position.Y + (_camera.Zoom * .5f));
+                
             }
 
             if (keyState.IsKeyDown(Keys.OemPlus))
             {
-                _camera.Zoom += 0.01f;
+                _camera.Zoom += 0.001f;
             }
 
             _rubeScene.Update(gameTime);
+
+            _character.Decay();
+
+            _camera.Position = _character.Body.Position - new Vector2(4, 4);
 
             base.Update(gameTime);
         }
@@ -133,10 +158,19 @@ namespace RUBELoaderTest
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
-            
+            GraphicsDevice.Clear(new Color(0f, 0f, 0.1f,0xff));
+
+            _spriteBatch.Begin();
+            var location = new Vector2(_graphics.PreferredBackBufferWidth/2, _graphics.PreferredBackBufferHeight/2);
+            _spriteBatch.DrawString(_font, string.Format("Camera Location (x: {0} y:{1}", _camera.Position.X, _camera.Position.Y), location, Color.White);
+            _spriteBatch.DrawString(_font, string.Format("Car Location (x: {0} y:{1}",
+                                                         (_character.Body.Position.X),
+                                                         (_character.Body.Position.Y)),
+                                    location + new Vector2(0, 10), Color.White);
+            _spriteBatch.End();
+
             _rubeScene.Draw();
-            Matrix proj = Matrix.CreateOrthographicOffCenter(0f, GraphicsDevice.Viewport.Width/50, GraphicsDevice.Viewport.Height/50, 0f, 0f, 1f);
+            Matrix proj = Matrix.CreateOrthographicOffCenter(0f, GraphicsDevice.Viewport.Width/100, GraphicsDevice.Viewport.Height/100, 0f, 0f, 1f);
             Matrix view = _camera.GetViewMatrix(Vector2.One);
             _physicsDebug.RenderDebugData(ref proj, ref view);
 
