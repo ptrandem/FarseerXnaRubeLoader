@@ -9,6 +9,6 @@ namespace RubeLoader.Interfaces
     public interface IBodyController
     {
         string BodyName { get; set; }
-        Body Body { get; set; }
+        List<Body> Bodies { get; set; }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using FarseerPhysics;
 using FarseerPhysics.Common;
 using FarseerPhysics.Dynamics;
 using FarseerPhysics.Dynamics.Joints;
@@ -116,13 +117,13 @@ namespace RubeLoader
                             break;
 
                         case "revolute":
-                            joint = new RevoluteJoint(_bodies[bodyAIndex], _bodies[bodyBIndex], anchorB, false);
+                            joint = new RevoluteJoint(_bodies[bodyAIndex], anchorA, _bodies[bodyBIndex], anchorB, false);
                             ((RevoluteJoint)joint).ReferenceAngle = -InvertYRadians(GetValue(j.refAngle, 0f));
-                            ((RevoluteJoint) joint).MotorEnabled = GetValue(j.enableMotor, false);
-                            ((RevoluteJoint) joint).MaxMotorTorque = GetValue(j.maxMotorTorque, 0f);
-                            ((RevoluteJoint) joint).MotorSpeed = GetValue(j.motorSpeed, 0f);
+                            ((RevoluteJoint)joint).MotorEnabled = GetValue(j.enableMotor, false);
+                            ((RevoluteJoint)joint).MaxMotorTorque = GetValue(j.maxMotorTorque, 0f);
+                            ((RevoluteJoint)joint).MotorSpeed = -GetValue(j.motorSpeed, 0f);
                             ((RevoluteJoint)joint).SetLimits(InvertYRadians(GetValue(j.upperLimit, 0f)), InvertYRadians(GetValue(j.lowerLimit, 0f)));
-                            ((RevoluteJoint) joint).LimitEnabled = GetValue(j.enableLimit, false);
+                            ((RevoluteJoint)joint).LimitEnabled = GetValue(j.enableLimit, false);
                             break;
 
                         case "prismatic":
@@ -189,7 +190,7 @@ namespace RubeLoader
                 {
                     if (i.file != null)
                     {
-                        var path = (string) i.file;
+                        var path = (string)i.file;
                         var n = path.LastIndexOf('/') + 1;
                         var m = path.LastIndexOf('.');
                         var textureName = path.Substring(n, m - n);
@@ -202,8 +203,8 @@ namespace RubeLoader
                         var image = new BodyImage
                             {
                                 Texture = _textures[textureName],
-                                Body = _bodies[(int) GetValue(i.body, 0)],
-                                Center = GetVector2(i.center),
+                                Body = _bodies[(int)GetValue(i.body, 0)],
+                                Center = ConvertUnitsA.ToDisplayUnits(GetVector2(i.center)),
                                 Corners = GetVectors(i.corners),
                                 Name = i.name,
                                 Opacity = i.opacity,
@@ -218,14 +219,14 @@ namespace RubeLoader
 
         public void AttachBodyControllers<T>(T controller, string bodyName)  where T : IBodyController
         {
-            controller.Body = _bodies.FirstOrDefault(j => j.UserData != null && ((BodyData)j.UserData).Name == bodyName);
             controller.BodyName = bodyName;
+            controller.Bodies = _bodies.Where(j => j.UserData != null && ((BodyData)j.UserData).Name == bodyName).ToList();
         }
 
         public void AttachJointControllers<T>(T controller, string jointName) where T : IJointController
         {
-            controller.Joint = _joints.FirstOrDefault(j => j.UserData != null && ((JointData) j.UserData).Name == jointName);
             controller.JointName = jointName;
+            controller.Joints = _joints.Where(j => j.UserData != null && ((JointData)j.UserData).Name == jointName).ToList();
         }
 
         #region Periodic Methods
@@ -234,47 +235,14 @@ namespace RubeLoader
             World.Step(Math.Min((float)gameTime.ElapsedGameTime.TotalSeconds, (1f / 60f)));
         }
 
-        public void Draw()
+        public void Draw(ref Matrix projection, ref Matrix view)
         {
             
-            _spriteBatch.Begin();
-
-            /* todo: this could render some stuff if the farseer debug view didn't work so perfectly well.  but it does, and this is shite. so.
-            foreach (var body in _bodies)
-            {
-                foreach (var fixture in body.FixtureList)
-                {
-                    Vertices verts;
-                    switch (fixture.ShapeType)
-                    {
-                        case ShapeType.Circle:
-                            var circle = fixture.Shape as CircleShape;
-                            _spriteBatch.DrawCircle(ConvertUnitsA.ToDisplayUnits(body.Position),
-                                                    ConvertUnitsA.ToDisplayUnits(circle.Radius), 40, Color.LightBlue, 1f);
-                            break;
-
-                        case ShapeType.Chain:
-                            var chain = fixture.Shape as ChainShape;
-                            DrawPolygon(_spriteBatch, chain.Vertices, body.Position);
-                            break;
-
-                        case ShapeType.Polygon:
-                            var poly = fixture.Shape as PolygonShape;
-                            DrawPolygon(_spriteBatch, poly.Vertices, body.Position);
-
-                            break;
-                        //case ShapeType.Edge:
-                        //    var edge = fixture.Shape as EdgeShape;
-                        //    DrawPolygon(_spriteBatch, edge.Vertex0, edge.Vertex1 body.Position);
-                        //    break;
-                    }
-                }
-            }
-            */
-
+            _spriteBatch.Begin(ref projection, ref view);
+            
             foreach (var image in _images)
             {
-                _spriteBatch.Draw(image.Texture, ConvertUnitsA.ToDisplayUnits(image.Body.Position),
+                _spriteBatch.Draw(image.Texture, ConvertUnitsA.ToDisplayUnits(image.Body.Position) - ConvertUnitsA.ToDisplayUnits(image.Center),
                                            null, Color.White, image.Body.Rotation, image.Center, image.Scale, SpriteEffects.None,
                                            0f);
 

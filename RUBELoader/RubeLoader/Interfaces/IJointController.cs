@@ -9,6 +9,6 @@ namespace RubeLoader.Interfaces
     public interface IJointController
     {
         string JointName { get; set; }
-        Joint Joint { get; set; }
+        List<Joint> Joints { get; set; }
     }
 }

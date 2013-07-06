@@ -17,7 +17,7 @@ namespace RUBELoaderTest
         private RubeScene _rubeScene;
         private DebugViewXNA _physicsDebug;
         private Camera _camera;
-        private Character _character;
+        private Car _car;
         private SpriteFont _font;
 
         public Game1()
@@ -51,21 +51,22 @@ namespace RUBELoaderTest
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _rubeScene = new RubeScene(@"..\..\..\..\..\RubeData\cartest.json", Content, GraphicsDevice);
+            //_rubeScene = new RubeScene(@"..\..\..\..\..\RubeData\cartest.json", Content, GraphicsDevice);
+            _rubeScene = new RubeScene(@"..\..\..\..\..\RubeData\radar-vehicle-test.json", Content, GraphicsDevice);
             _camera = new Camera(GraphicsDevice.Viewport);
             _font = Content.Load<SpriteFont>("font");
 
             _physicsDebug = new DebugViewXNA(_rubeScene.World);
-            _physicsDebug.LoadContent(this.GraphicsDevice, this.Content);
+            _physicsDebug.LoadContent(GraphicsDevice, Content);
             _physicsDebug.AppendFlags(DebugViewFlags.Shape);
             _physicsDebug.AppendFlags(DebugViewFlags.Controllers);
             _physicsDebug.AppendFlags(DebugViewFlags.DebugPanel);
             _physicsDebug.AppendFlags(DebugViewFlags.PerformanceGraph);
 
-            _character = new Character();
-            _rubeScene.AttachJointControllers(_character, "characterWheel");
-            _rubeScene.AttachBodyControllers(_character, "chacterbody");
-            _character.Init();
+            _car = new Car();
+            _rubeScene.AttachJointControllers(_car, "characterWheel");
+            _rubeScene.AttachBodyControllers(_car, "chacterbody");
+            _car.Init();
 
 
         }
@@ -117,17 +118,24 @@ namespace RUBELoaderTest
 
             if(keyState.IsKeyDown(Keys.A))
             {
-                _character.MoveLeft();
+                _car.MoveLeft();
             }
-
-            if (keyState.IsKeyDown(Keys.D))
+            else if (keyState.IsKeyDown(Keys.D))
             {
-                _character.MoveRight();
+                _car.MoveRight();
+            }
+            else if (keyState.IsKeyDown(Keys.S))
+            {
+                _car.Brake();
+            }
+            else
+            {
+                _car.Idle();
             }
 
             if (keyState.IsKeyDown(Keys.W))
             {
-                _character.Jump();
+                _car.Jump();
             }
 
             if (keyState.IsKeyDown(Keys.OemMinus))
@@ -145,9 +153,9 @@ namespace RUBELoaderTest
 
             _rubeScene.Update(gameTime);
 
-            _character.Decay();
+            _car.Decay();
 
-            _camera.Position = _character.Body.Position - new Vector2(4, 4);
+            _camera.Position = _car.Bodies[0].Position - new Vector2(4, 4);
 
             base.Update(gameTime);
         }
@@ -161,17 +169,18 @@ namespace RUBELoaderTest
             GraphicsDevice.Clear(new Color(0f, 0f, 0.1f,0xff));
 
             _spriteBatch.Begin();
-            var location = new Vector2(_graphics.PreferredBackBufferWidth/2, _graphics.PreferredBackBufferHeight/2);
+            var location = new Vector2(_graphics.PreferredBackBufferWidth/2f, _graphics.PreferredBackBufferHeight/2f);
             _spriteBatch.DrawString(_font, string.Format("Camera Location (x: {0} y:{1}", _camera.Position.X, _camera.Position.Y), location, Color.White);
             _spriteBatch.DrawString(_font, string.Format("Car Location (x: {0} y:{1}",
-                                                         (_character.Body.Position.X),
-                                                         (_character.Body.Position.Y)),
+                                                         (_car.Bodies[0].Position.X),
+                                                         (_car.Bodies[0].Position.Y)),
                                     location + new Vector2(0, 10), Color.White);
             _spriteBatch.End();
 
-            _rubeScene.Draw();
             Matrix proj = Matrix.CreateOrthographicOffCenter(0f, GraphicsDevice.Viewport.Width/100, GraphicsDevice.Viewport.Height/100, 0f, 0f, 1f);
             Matrix view = _camera.GetViewMatrix(Vector2.One);
+
+            _rubeScene.Draw(ref proj, ref view);
             _physicsDebug.RenderDebugData(ref proj, ref view);
 
             base.Draw(gameTime);
